@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -38,7 +37,6 @@ import io.github.sceneview.ar.node.PlacementMode
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             InHomeARTheme {
                 Surface(
@@ -82,8 +80,7 @@ fun Menu(
 
     Row(
         modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp),
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -124,6 +121,7 @@ fun FurnitureCard(
         Image(
             painter = painterResource(id = imageId),
             contentDescription = "Furniture",
+            modifier = Modifier.size(100.dp),
             contentScale = ContentScale.FillBounds
         )
     }
@@ -158,6 +156,7 @@ fun ARScreen(
                 ).apply {
                     loadModelGlbAsync(
                         glbFileLocation = "models/${model}.glb",
+                        scaleToUnits = 0.8f
                     ) {
 
                     }
