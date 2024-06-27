@@ -67,5 +67,5 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     // SceneView AR dependencies
-    implementation("io.github.sceneview:arsceneview:0.10.0")
+    implementation(libs.arsceneview)
 }
