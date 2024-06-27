@@ -1,6 +1,7 @@
 package pe.edu.upc.inhomear
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -14,9 +15,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,8 +27,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.google.ar.core.Config
 import pe.edu.upc.inhomear.ui.theme.InHomeARTheme
 import pe.edu.upc.inhomear.ui.theme.Translucent
+import io.github.sceneview.ar.ARScene
+import io.github.sceneview.ar.node.ArModelNode
+import io.github.sceneview.ar.node.ArNode
+import io.github.sceneview.ar.node.PlacementMode
+import io.github.sceneview.model.Model
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,7 +49,13 @@ class MainActivity : ComponentActivity() {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                     ) {
-                        Menu(modifier = Modifier.align(Alignment.BottomCenter))
+                        val currentModel = remember {
+                            mutableStateOf("chair")
+                        }
+                        ARScreen(currentModel.value)
+                        Menu(modifier = Modifier.align(Alignment.BottomCenter)) {
+                            currentModel.value = it
+                        }
                     }
                 }
             }
@@ -50,7 +65,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Menu(
-    modifier: Modifier
+    modifier: Modifier,
+    onClick: (String) -> Unit
 ) {
     var currentIndex by remember { mutableIntStateOf(0) }
     val itemsList = listOf(
@@ -62,6 +78,7 @@ fun Menu(
 
     fun updateIndex(offset: Int) {
         currentIndex = (currentIndex + offset + itemsList.size) % itemsList.size
+        onClick(itemsList[currentIndex].name)
     }
 
     Row(
@@ -110,6 +127,74 @@ fun FurnitureCard(
             contentDescription = "Furniture",
             contentScale = ContentScale.FillBounds
         )
+    }
+}
+
+@Composable
+fun ARScreen(
+    model: String
+) {
+    val nodeList = remember {
+        mutableListOf<ArNode>()
+    }
+    val modelNode = remember {
+        mutableStateOf<ArModelNode?>(null)
+    }
+    val placeModelButton = remember {
+        mutableStateOf(false)
+    }
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        ARScene(
+            modifier = Modifier.fillMaxSize(),
+            nodes = nodeList,
+            planeRenderer = true,
+            onCreate = { arSceneView ->
+                arSceneView.lightEstimationMode = Config.LightEstimationMode.DISABLED
+                arSceneView.planeRenderer.isShadowReceiver = false
+                modelNode.value = ArModelNode(
+                    arSceneView.engine,
+                    PlacementMode.INSTANT
+                ).apply {
+                    loadModelGlbAsync(
+                        glbFileLocation = "${model}.glb",
+                    ) {
+
+                    }
+                    onAnchorChanged = {
+                        placeModelButton.value = !isAnchored
+                    }
+                    onHitResult = { nodeList, hitResult ->
+                        placeModelButton.value = nodeList.isTracking
+                    }
+                }
+                nodeList.add(modelNode.value!!)
+            },
+            onSessionCreate = {
+                planeRenderer.isVisible = false
+            }
+        )
+        if (placeModelButton.value) {
+            Button(
+                onClick = {
+                    modelNode.value?.anchor()
+                },
+                modifier = Modifier.align(Alignment.Center)
+                /*enabled = !placeModelButton.value*/
+            ) {
+                Text("Place Model")
+            }
+        }
+    }
+
+    LaunchedEffect(key1 = model) {
+        modelNode.value?.loadModelGlbAsync(
+            glbFileLocation = "${model}.glb",
+        ) {
+            modelNode.value?.anchor()
+        }
+        Log.e("Error loading model", "ERROR LOADING MODEL")
     }
 }
 
