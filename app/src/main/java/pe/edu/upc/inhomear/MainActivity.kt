@@ -157,7 +157,7 @@ fun ARScreen(
                     PlacementMode.INSTANT
                 ).apply {
                     loadModelGlbAsync(
-                        glbFileLocation = "${model}.glb",
+                        glbFileLocation = "models/${model}.glb",
                     ) {
 
                     }
@@ -179,7 +179,7 @@ fun ARScreen(
                 onClick = {
                     modelNode.value?.anchor()
                 },
-                modifier = Modifier.align(Alignment.Center)
+                modifier = Modifier.align(Alignment.TopCenter)
                 /*enabled = !placeModelButton.value*/
             ) {
                 Text("Place Model")
@@ -189,7 +189,7 @@ fun ARScreen(
 
     LaunchedEffect(key1 = model) {
         modelNode.value?.loadModelGlbAsync(
-            glbFileLocation = "${model}.glb",
+            glbFileLocation = "models/${model}.glb",
             scaleToUnits = 0.8f
         ) {
             /*modelNode.value?.anchor()*/
