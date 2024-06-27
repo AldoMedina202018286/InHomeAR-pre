@@ -49,7 +49,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                     ) {
                         val currentModel = remember {
-                            mutableStateOf("chair")
+                            mutableStateOf("Chair")
                         }
                         ARScreen(currentModel.value)
                         Menu(modifier = Modifier.align(Alignment.BottomCenter)) {
@@ -67,7 +67,7 @@ fun Menu(
     modifier: Modifier,
     onClick: (String) -> Unit
 ) {
-    var currentIndex by remember { mutableIntStateOf(0) }
+    var currentIndex by remember { mutableStateOf(0) }
     val itemsList = listOf(
         Furniture("Chair", R.drawable.chair),
         Furniture("Armchair", R.drawable.armchair),
@@ -190,8 +190,9 @@ fun ARScreen(
     LaunchedEffect(key1 = model) {
         modelNode.value?.loadModelGlbAsync(
             glbFileLocation = "${model}.glb",
+            scaleToUnits = 0.8f
         ) {
-            modelNode.value?.anchor()
+            /*modelNode.value?.anchor()*/
         }
         Log.e("Error loading model", "ERROR LOADING MODEL")
     }
